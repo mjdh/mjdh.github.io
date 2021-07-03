@@ -12,7 +12,7 @@ I already run an off-site Wireguard server, with site-to-site networking, allowi
 
 I have a Raspberry Pi4, operating as a mini-server for some other services, which is always-on. I have recently been experimenting with Docker as a way of building in additional functionality to that server while keeping things broadly isolated. I won't cover installing and setting up Docker on the Raspberry Pi as this is well-covered in the [Docker documentation](https://docs.docker.com/engine/install/debian/#install-using-the-convenience-script).
 
-I have figured this out with the help of many blog and forum posts from others. I have set out a list of the main references at the bottom. 
+I have figured this out with the help of many blog and forum posts from others, and have tried to cite those throughout.
 
 I'm pretty new to Docker and there may be errors or optimisations which I haven't found yet. Please do point them out, but you're responsible for making sure you're comfortable and for the outcome if you follow the same steps I have. There is probably a more efficient way to set everything up using a docker-compose but I haven't fully figured that out yet.
 
@@ -33,6 +33,7 @@ I'm pretty new to Docker and there may be errors or optimisations which I haven'
 - The public key of your Wireguard server.
 
 ##Setting it all up
+
 ###Update host
 
 Before starting, I recommend making sure your Raspberry Pi is up to date. Connect to the Raspberry Pi by SSH and run
@@ -62,6 +63,7 @@ docker run -d \
 ```
 
 ###Docker macvlan network
+
 Next, we need to create a Docker [macvlan](https://docs.docker.com/network/macvlan/) network to allow clients on your home network to connect to the Docker container. I tried both [ipvlan](https://docs.docker.com/network/ipvlan/) level 2 and macvlan, but ipvlan did not work. The subnet should be the subnet of your home network e.g. 192.168.1.0/24. The gateway should be the IP address of your home network's gateway e.g. your router, such as 192.168.1.1. "parent" is the logical name of the host's network interface, which for me is eth0.  If you're unsure, you can check by running `ip addr` and looking for the interface which is attached to your home network. The final term "host_macvlan" is the name given to our new Docker network.
 
 ```
@@ -72,6 +74,7 @@ docker network create -d macvlan \
 ```
 
 ###Set up Wireguard Docker container
+
 Next, we will set up the Wireguard Docker container and configure it to connect to our server. In your home directory, create a folder which will hold the configuration files for the container.
 
 
@@ -144,3 +147,6 @@ Save and close the file, then ssh into your Wireguard server and update its wg0.
 Once the server's configuration has been updated, return to portainer and start the wireguard container. Check the log and it should now report the creation of the wg0 interface and the iptables rules in PostUp. Open a console into the container and run `curl ifconfig.co`. This will return the public IP address of the container, which should now be the public IP address of the server. 
 
 Assuming everything has gone right up to this point, the container should now be running with Wireguard connected and the iptables rules created to forward traffic. The final step is to edit the network configuration of the Switch to use the new gateway. Navigate into your network configuration and change the settings. The Switch will need a static IP address, leave the subnet mask unchanged, and enter the home network private IP address of the wireguard container as the gateway. You also need to set DNS server settings manually; either direct this to your ISPs DNS server or use something like Cloudflare (1.1.1.1 and 1.0.0.1).
+
+Test the connection and if everything is working correctly you should now see that the global IP reported by the Switch is the same as the wireguard container and the NAT type has changed from D to something which will work better like A or B. 
+
