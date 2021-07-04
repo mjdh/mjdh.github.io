@@ -64,7 +64,7 @@ docker run -d \
 
 ###Docker macvlan network
 
-Next, we need to create a Docker [macvlan](https://docs.docker.com/network/macvlan/) network to allow clients on your home network to connect to the Docker container. I tried both [ipvlan](https://docs.docker.com/network/ipvlan/) level 2 and macvlan, but ipvlan did not work. The subnet should be the subnet of your home network e.g. 192.168.1.0/24. The gateway should be the IP address of your home network's gateway e.g. your router, such as 192.168.1.1. "parent" is the logical name of the host's network interface, which for me is eth0.  If you're unsure, you can check by running `ip addr` and looking for the interface which is attached to your home network. The final term "host_macvlan" is the name given to our new Docker network.
+Next, we need to create a Docker [macvlan](https://docs.docker.com/network/macvlan/) network to allow clients on your home network to connect to the Docker container. I tried both [ipvlan](https://docs.docker.com/network/ipvlan/) level 2 and macvlan, but ipvlan did not work. [Sreenivas Makam](https://sreeninet.wordpress.com/2016/05/29/macvlan-and-ipvlan/) has a good post explaining the differences. The subnet should be the subnet of your home network e.g. 192.168.1.0/24. The gateway should be the IP address of your home network's gateway e.g. your router, such as 192.168.1.1. "parent" is the logical name of the host's network interface, which for me is eth0.  If you're unsure, you can check by running `ip addr` and looking for the interface which is attached to your home network. The final term "host_macvlan" is the name given to our new Docker network.
 
 ```
 docker network create -d macvlan \
